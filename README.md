@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/Prahlad-07/CRED-Machine-Coding-Round/blob/master/CRED-Logo-Nishant-Verma.jpg?raw=true" width="180" alt="CRED Logo" />
+<img src="https://github.com/Prahlad-07/CRED-Machine-Coding-Round/blob/master/CRED-Logo-Nishant-Verma.jpg?raw=true" alt="CRED Logo" />
 
 # Smart Parking Lot Management System
 
