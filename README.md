@@ -2,7 +2,7 @@
 
 <img src="https://github.com/Prahlad-07/CRED-Machine-Coding-Round/blob/master/CRED-Logo-Nishant-Verma.jpg?raw=true" alt="CRED Logo" />
 
-# Smart Parking Lot Management System
+# CRED - Machine coding interview experiance(Backend Engineer) 
 
 [![Java](https://img.shields.io/badge/Java-8%2B-ED8B00?style=for-the-badge&logo=java&logoColor=white)](https://www.oracle.com/java/)
 [![Thread Safe](https://img.shields.io/badge/Thread-Safe-success?style=for-the-badge)](https://github.com)
