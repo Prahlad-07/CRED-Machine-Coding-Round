@@ -1,13 +1,18 @@
+/*
+ * Author: Prahlad_07
+ * Created On: 2025-12-10
+ */
+
 package org.example.models;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class ParkingTicket {
-    private String ticketId;
-    private String licensePlate;
-    private String spotId;
-    private LocalDateTime entryTime;
+    private final String ticketId;
+    private final String licensePlate;
+    private final String spotId;
+    private final LocalDateTime entryTime;
     private LocalDateTime exitTime;
 
     public ParkingTicket(String ticketId, String licensePlate, String spotId, LocalDateTime entryTime) {
@@ -17,17 +22,33 @@ public class ParkingTicket {
         this.entryTime = entryTime;
     }
 
-    public String getTicketId() { return ticketId; }
-    public String getLicensePlate() { return licensePlate; }
-    public String getSpotId() { return spotId; }
-    public LocalDateTime getEntryTime() { return entryTime; }
+    public String getTicketId() {
+        return ticketId;
+    }
 
-    public void setExitTime(LocalDateTime exitTime) { this.exitTime = exitTime; }
-    public LocalDateTime getExitTime() { return exitTime; }
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
+    public String getSpotId() {
+        return spotId;
+    }
+
+    public LocalDateTime getEntryTime() {
+        return entryTime;
+    }
+
+    public LocalDateTime getExitTime() {
+        return exitTime;
+    }
+
+    public void setExitTime(LocalDateTime exitTime) {
+        this.exitTime = exitTime;
+    }
 
     public double calculateDurationHours(LocalDateTime currentTime) {
-        LocalDateTime endTime = (exitTime != null) ? exitTime : currentTime;
-        long seconds = ChronoUnit.SECONDS.between(entryTime, endTime);
+        LocalDateTime end = exitTime != null ? exitTime : currentTime;
+        long seconds = ChronoUnit.SECONDS.between(entryTime, end);
         return seconds / 3600.0;
     }
 }

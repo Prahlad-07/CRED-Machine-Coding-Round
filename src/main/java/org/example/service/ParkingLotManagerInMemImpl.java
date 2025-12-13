@@ -1,3 +1,8 @@
+/*
+ * Author: Prahlad_07
+ * Created On: 2025-12-10
+ */
+
 package org.example.service;
 
 import org.example.enums.SpotStatus;
@@ -5,6 +10,7 @@ import org.example.enums.SpotType;
 import org.example.enums.VehicleType;
 import org.example.models.ParkingSpot;
 import org.example.models.ParkingTicket;
+import org.example.models.Vehicle;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -14,87 +20,97 @@ import java.util.stream.Collectors;
 public class ParkingLotManagerInMemImpl implements ParkingLotManager {
 
     private final Map<String, ParkingSpot> spotMap = new ConcurrentHashMap<>();
-    private final Map<String, ParkingTicket> activeTicket = new ConcurrentHashMap<>();
+    private final Map<String, ParkingTicket> activeTickets = new ConcurrentHashMap<>();
 
     @Override
     public boolean addParkingSpot(ParkingSpot spot) {
-        if (spot == null || spot.getSpotId() == null || spotMap.containsKey(spot.getSpotId())) {
+        if (spot == null || spot.getSpotId() == null) {
             return false;
         }
-        spotMap.put(spot.getSpotId(), spot);
-        return true;
+        return spotMap.putIfAbsent(spot.getSpotId(), spot) == null;
     }
 
     @Override
-    public Boolean removeParkingSpot(String spotId) {
-        if (spotId == null || !spotMap.containsKey(spotId)) {
+    public boolean removeParkingSpot(String spotId) {
+        if (spotId == null) {
             return false;
         }
 
         ParkingSpot spot = spotMap.get(spotId);
-        if (spot != null && spot.getStatus() == SpotStatus.OCCUPIED) {
+        if (spot == null || spot.getStatus() == SpotStatus.OCCUPIED) {
             return false;
         }
+
         spotMap.remove(spotId);
         return true;
     }
 
     @Override
-    public ParkingTicket parkVehicle(com.parkinglot.models.Vehicle vehicle, LocalDateTime entryTime) {
-        if (vehicle == null || vehicle.getLicensePlate() == null || activeTicket.containsKey(vehicle.getLicensePlate())) {
+    public ParkingTicket parkVehicle(Vehicle vehicle, LocalDateTime entryTime) {
+        if (vehicle == null || vehicle.getLicensePlate() == null) {
+            return null;
+        }
+        if (activeTickets.containsKey(vehicle.getLicensePlate())) {
             return null;
         }
 
-        ParkingSpot bestSpot = getBestSpot(vehicle.getVehicleType());
-        if (bestSpot == null) {
+        ParkingSpot spot = findBestSpot(vehicle.getVehicleType());
+        if (spot == null) {
             return null;
         }
 
-        bestSpot.setStatus(SpotStatus.OCCUPIED);
-        bestSpot.setParkedVehicleLicense(vehicle.getLicensePlate());
+        spot.setStatus(SpotStatus.OCCUPIED);
+        spot.setParkedVehicleLicense(vehicle.getLicensePlate());
 
-        String ticketId = UUID.randomUUID().toString();
-        ParkingTicket ticket = new ParkingTicket(ticketId, vehicle.getLicensePlate(), bestSpot.getSpotId(), entryTime);
+        ParkingTicket ticket = new ParkingTicket(
+                UUID.randomUUID().toString(),
+                vehicle.getLicensePlate(),
+                spot.getSpotId(),
+                entryTime
+        );
 
-        activeTicket.put(vehicle.getLicensePlate(), ticket);
-
+        activeTickets.put(vehicle.getLicensePlate(), ticket);
         return ticket;
     }
 
     @Override
-    public Boolean exitVehicle(String licensePlate, LocalDateTime exitTime) {
-        if (licensePlate == null || !activeTicket.containsKey(licensePlate)) {
+    public boolean exitVehicle(String licensePlate, LocalDateTime exitTime) {
+        if (licensePlate == null) {
             return false;
         }
 
-        ParkingTicket ticket = activeTicket.get(licensePlate);
-        ticket.setExitTime(exitTime);
+        ParkingTicket ticket = activeTickets.remove(licensePlate);
+        if (ticket == null) {
+            return false;
+        }
 
+        ticket.setExitTime(exitTime);
         ParkingSpot spot = spotMap.get(ticket.getSpotId());
         if (spot != null) {
             spot.setStatus(SpotStatus.AVAILABLE);
             spot.setParkedVehicleLicense(null);
         }
-
-        activeTicket.remove(licensePlate);
         return true;
     }
 
     @Override
     public ParkingSpot findVehicleByLicense(String licensePlate) {
-        if (licensePlate != null && activeTicket.containsKey(licensePlate)) {
-            ParkingTicket ticket = activeTicket.get(licensePlate);
-            return spotMap.get(ticket.getSpotId());
+        if (licensePlate == null) {
+            return null;
         }
-        return null;
+
+        ParkingTicket ticket = activeTickets.get(licensePlate);
+        return ticket == null ? null : spotMap.get(ticket.getSpotId());
     }
 
     @Override
     public List<ParkingSpot> getAvailableSpotsByType(SpotType spotType) {
-        if (spotType == null) return new ArrayList<>();
+        if (spotType == null) {
+            return new ArrayList<>();
+        }
 
         return spotMap.values().stream()
-                .filter(s -> s.getSpotType() == spotType && s.getStatus() == SpotStatus.AVAILABLE)
+                .filter(s -> s.getStatus() == SpotStatus.AVAILABLE && s.getSpotType() == spotType)
                 .sorted(Comparator.comparingInt(ParkingSpot::getFloor)
                         .thenComparing(ParkingSpot::getSpotId))
                 .collect(Collectors.toList());
@@ -102,54 +118,42 @@ public class ParkingLotManagerInMemImpl implements ParkingLotManager {
 
     @Override
     public ParkingSpot getParkingSpot(String spotId) {
-        if (spotId == null) return null;
+        if (spotId == null) {
+            return null;
+        }
         return spotMap.get(spotId);
     }
 
-    private ParkingSpot getBestSpot(VehicleType vehicleType) {
-        if (vehicleType == null) return null;
+    private ParkingSpot findBestSpot(VehicleType vehicleType) {
+        if (vehicleType == null) {
+            return null;
+        }
 
-        List<SpotType> allowedTypes = getCompatibleTypes(vehicleType);
+        List<SpotType> compatibleTypes = getCompatibleSpotTypes(vehicleType);
 
-        List<ParkingSpot> candidates = spotMap.values().stream()
+        return spotMap.values().stream()
                 .filter(s -> s.getStatus() == SpotStatus.AVAILABLE)
-                .filter(s -> allowedTypes.contains(s.getSpotType()))
-                .collect(Collectors.toList());
-
-        if (candidates.isEmpty()) return null;
-
-        candidates.sort(Comparator
-                .comparingInt(this::getSpotSizeValue)
-                .thenComparingInt(ParkingSpot::getFloor)
-                .thenComparing(ParkingSpot::getSpotId)
-        );
-
-        return candidates.get(0);
+                .filter(s -> compatibleTypes.contains(s.getSpotType()))
+                .sorted(Comparator.comparingInt(this::spotRank)
+                        .thenComparingInt(ParkingSpot::getFloor)
+                        .thenComparing(ParkingSpot::getSpotId))
+                .findFirst()
+                .orElse(null);
     }
 
-    private List<SpotType> getCompatibleTypes(VehicleType type) {
-        List<SpotType> types = new ArrayList<>();
-        if (type == VehicleType.MOTORCYCLE) {
-            types.add(SpotType.COMPACT);
-            types.add(SpotType.REGULAR);
-            types.add(SpotType.LARGE);
+    private List<SpotType> getCompatibleSpotTypes(VehicleType vehicleType) {
+        if (vehicleType == VehicleType.MOTORCYCLE) {
+            return List.of(SpotType.COMPACT, SpotType.REGULAR, SpotType.LARGE);
         }
-        else if (type == VehicleType.CAR) {
-            types.add(SpotType.REGULAR);
-            types.add(SpotType.LARGE);
+        if (vehicleType == VehicleType.CAR) {
+            return List.of(SpotType.REGULAR, SpotType.LARGE);
         }
-        else if (type == VehicleType.TRUCK) {
-            types.add(SpotType.LARGE);
-        }
-        return types;
+        return List.of(SpotType.LARGE);
     }
 
-    private int getSpotSizeValue(ParkingSpot spot) {
-        switch(spot.getSpotType()) {
-            case COMPACT: return 1;
-            case REGULAR: return 2;
-            case LARGE: return 3;
-            default: return 4;
-        }
+    private int spotRank(ParkingSpot spot) {
+        if (spot.getSpotType() == SpotType.COMPACT) return 1;
+        if (spot.getSpotType() == SpotType.REGULAR) return 2;
+        return 3;
     }
 }
