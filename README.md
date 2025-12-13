@@ -18,21 +18,6 @@
 
 ---
 
-## 📋 Table of Contents
-
-- [Problem Statement](#-problem-statement)
-- [Key Features](#-key-features)
-- [System Architecture](#-system-architecture)
-- [The Smart Allocation Algorithm](#-the-smart-allocation-algorithm)
-- [Technical Implementation](#-technical-implementation)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-- [Testing](#-testing)
-- [Design Patterns](#-design-patterns--principles)
-- [Performance](#-performance-metrics)
-
----
-
 ## 🎯 Problem Statement
 
 Design and implement a **Low-Level Design (LLD)** for a multi-floor parking lot that intelligently manages vehicle parking with space optimization as the primary goal.
