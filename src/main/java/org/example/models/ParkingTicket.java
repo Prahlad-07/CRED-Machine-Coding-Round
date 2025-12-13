@@ -25,7 +25,6 @@ public class ParkingTicket {
     public void setExitTime(LocalDateTime exitTime) { this.exitTime = exitTime; }
     public LocalDateTime getExitTime() { return exitTime; }
 
-    // Required for duration calculations
     public double calculateDurationHours(LocalDateTime currentTime) {
         LocalDateTime endTime = (exitTime != null) ? exitTime : currentTime;
         long seconds = ChronoUnit.SECONDS.between(entryTime, endTime);
