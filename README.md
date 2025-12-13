@@ -248,106 +248,7 @@ src/
                 └── ParkingLotTest.java       # JUnit 5 tests
 ```
 
----
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Java 8 or higher
-- Maven (optional, for dependency management)
-
-### Option 1: Run the Demo
-
-```bash
-# Clone the repository
-git clone https://github.com/Prahlad-07/CRED-Machine-Coding-Round.git
-cd CRED-Machine-Coding-Round
-
-# Compile all source files
-javac -d out src/main/java/com/parkinglot/**/*.java
-
-# Run the main demo
-java -cp out com.parkinglot.Main
-```
-
-**Expected Output:**
-```
-=== Parking Lot Initialized ===
-Total Spots: 150 (3 floors × 50 spots)
-
-MOTORCYCLE-001 → Parked at C-1-01 (Floor 1, Compact)
-CAR-001 → Parked at R-1-26 (Floor 1, Regular)
-TRUCK-001 → Parked at L-1-41 (Floor 1, Large)
-
-MOTORCYCLE-001 exited successfully ✓
-C-1-01 is now AVAILABLE
-```
-
-### Option 2: Run with Maven
-
-```bash
-# Clean and compile
-mvn clean compile
-
-# Run main class
-mvn exec:java -Dexec.mainClass="com.parkinglot.Main"
-
-# Run tests
-mvn test
-```
-
-### Option 3: Import into IDE
-
-1. Open IntelliJ IDEA / Eclipse
-2. Import as Maven project
-3. Run `Main.java` for demo
-4. Run `ParkingLotTest.java` for tests
-
----
-
-## 🧪 Testing
-
-### Test Coverage
-
-| Test Case | Description | Status |
-|-----------|-------------|--------|
-| **Smart Allocation** | Motorcycle gets compact before regular | ✅ |
-| **Floor Priority** | Lower floors preferred when sizes equal | ✅ |
-| **Spot ID Priority** | Lexicographic ordering for determinism | ✅ |
-| **No Space** | Graceful handling when lot is full | ✅ |
-| **Null Safety** | All edge cases with null inputs | ✅ |
-| **Concurrent Park** | 100 threads parking simultaneously | ✅ |
-| **Concurrent Exit** | 50 threads exiting simultaneously | ✅ |
-| **Display Status** | Accurate floor-wise availability | ✅ |
-
-### Run All Tests
-
-```bash
-# Using Maven
-mvn test
-
-# Using JUnit directly
-java -cp junit-platform-console-standalone.jar:out \
-  org.junit.platform.console.ConsoleLauncher \
-  --select-class com.parkinglot.ParkingLotTest
-```
-
-### Sample Test
-
-```java
-@Test
-void testSmartAllocation() {
-    Vehicle motorcycle = new Vehicle("M-001", VehicleType.MOTORCYCLE);
-    ParkingTicket ticket = manager.park(motorcycle);
-    
-    // Should get the smallest compatible spot (Compact)
-    assertEquals(SpotType.COMPACT, ticket.getSpot().getType());
-    assertEquals(1, ticket.getSpot().getFloor()); // Lowest floor
-}
-```
-
----
 
 ## 🎨 Design Patterns & Principles
 
@@ -386,22 +287,7 @@ Tested on: Intel i7, 16GB RAM, Java 11
 
 ---
 
-## 🛣️ Future Enhancements
 
-- [ ] **Pricing Engine:** Time-based billing system
-- [ ] **Reservation System:** Pre-book spots via API
-- [ ] **REST API:** Spring Boot integration
-- [ ] **Database:** JPA/Hibernate for persistence
-- [ ] **Analytics:** Dashboard for occupancy trends
-- [ ] **IoT Integration:** Sensor-based spot detection
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 👨‍💻 Author
 
